@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'; // Import useRef
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,281 +6,227 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
-  KeyboardAvoidingView, // Import KeyboardAvoidingView
+  KeyboardAvoidingView,
   Platform,
-  ScrollView,
-  StatusBar, // Import StatusBar
-  ActivityIndicator // Import ActivityIndicator for loading state
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
-// Basic email validation regex (can be more complex)
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-export default function Signup() {
+export default function RegisterScreen() {
   const navigation = useNavigation();
+
+  // Các state cho form
   const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
+  const [email, setEmail]   = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false); // State for loading indicator
+  const [loading, setLoading] = useState(false);
 
-  // Refs for input focus chaining
-  const emailInputRef = useRef(null);
-  const passwordInputRef = useRef(null);
-  const confirmPasswordInputRef = useRef(null);
-
-  const handleSignup = () => {
-    // Trim inputs before validation
-    const trimmedFullName = fullName.trim();
-    const trimmedEmail = email.trim();
-
-    if (!trimmedFullName || !trimmedEmail || !password || !confirmPassword) {
-      Alert.alert('Lỗi', 'Vui lòng điền đầy đủ thông tin.');
+  const handleSignUp = async () => {
+    // Kiểm tra dữ liệu đầu vào
+    if (!fullName || !username || !email || !password || !confirmPassword) {
+      Alert.alert('Error', 'Please fill all fields.');
       return;
     }
-
-    if (!emailRegex.test(trimmedEmail)) {
-        Alert.alert('Lỗi', 'Vui lòng nhập địa chỉ email hợp lệ.');
-        return;
-    }
-
-    // Example: Basic password length check
-    if (password.length < 6) {
-        Alert.alert('Lỗi', 'Mật khẩu phải có ít nhất 6 ký tự.');
-        return;
-    }
-
     if (password !== confirmPassword) {
-      Alert.alert('Lỗi', 'Mật khẩu xác nhận không khớp.');
+      Alert.alert('Error', 'Passwords do not match.');
       return;
     }
 
-    // --- Simulate API Call ---
-    setIsLoading(true); // Show loading indicator
-    console.log('Đang đăng ký với:', { fullName: trimmedFullName, email: trimmedEmail, password });
+    setLoading(true);
+    try {
+      // Gọi API đăng ký
+      const response = await fetch('https://gym.s4h.edu.vn/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: fullName.trim(),
+          username: username.trim(),
+          email: email.trim(),
+          password: password.trim(),
+        }),
+      });
+      const data = await response.json();
 
-    // Simulate network request delay
-    setTimeout(() => {
-      setIsLoading(false); // Hide loading indicator
-      // In a real app, check the API response here
-      Alert.alert('Thành công', 'Tài khoản đã được tạo thành công!', [
-        {
-          text: 'OK',
-          onPress: () => navigation.navigate('Login') // Navigate after success
-        }
-      ]);
-       // Clear fields after successful signup (optional)
-       setFullName('');
-       setEmail('');
-       setPassword('');
-       setConfirmPassword('');
-    }, 1500); // Simulate 1.5 second delay
-    // -----------------------
+      if (response.ok) {
+        // Đăng ký thành công
+        console.log('Register success:', data);
+        Alert.alert('Success', 'Registered successfully!');
+        // Quay về màn hình đăng nhập hoặc chuyển sang màn hình khác
+        navigation.replace('Login'); 
+      } else {
+        // Báo lỗi từ backend
+        console.log('Register error:', data);
+        Alert.alert('Register failed', data?.message || 'Unknown error');
+      }
+    } catch (error) {
+      console.error('Error register:', error);
+      Alert.alert('Error', 'Something went wrong');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBack = () => {
+    // Nếu bạn muốn nút back (trên góc màn hình)
+    navigation.goBack();
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-      enabled
+    <KeyboardAvoidingView 
+      style={styles.container} 
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView
-        contentContainerStyle={styles.scrollContainer}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        >
-          <Text style={styles.backText}>←</Text>
-        </TouchableOpacity>
+      {/* Nút Back (nếu cần thiết) */}
+      <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+        <Text style={styles.backText}>←</Text>
+      </TouchableOpacity>
 
-        <Text style={styles.title}>ĐĂNG KÝ</Text>
+      <View style={styles.registerBox}>
+        <Text style={styles.registerTitle}>Register</Text>
 
-        <View style={styles.formContainer}>
-          {/* Full Name Input */}
-          <Text style={styles.label}>Họ và tên:</Text>
+        {/* Full name */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Full name:</Text>
           <TextInput
             style={styles.input}
-            placeholder="Nhập họ và tên của bạn"
+            placeholder="Enter your name"
             placeholderTextColor="#999"
             value={fullName}
             onChangeText={setFullName}
-            autoCapitalize="words" // Capitalize first letter of each word
-            autoCorrect={false}
-            returnKeyType="next"
-            onSubmitEditing={() => emailInputRef.current?.focus()}
-            blurOnSubmit={false}
           />
+        </View>
 
-          {/* Email Input */}
+        {/* Username */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Username:</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your username"
+            placeholderTextColor="#999"
+            autoCapitalize="none"
+            value={username}
+            onChangeText={setUsername}
+          />
+        </View>
+
+        {/* Email */}
+        <View style={styles.inputContainer}>
           <Text style={styles.label}>Email:</Text>
           <TextInput
-            ref={emailInputRef}
             style={styles.input}
-            placeholder="Nhập email của bạn"
+            placeholder="Enter your email"
             placeholderTextColor="#999"
-            value={email}
-            onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
-            autoCorrect={false}
-            textContentType="emailAddress" // Helps with autofill
-            returnKeyType="next"
-            onSubmitEditing={() => passwordInputRef.current?.focus()}
-            blurOnSubmit={false}
+            value={email}
+            onChangeText={setEmail}
           />
+        </View>
 
-          {/* Password Input */}
-          <Text style={styles.label}>Mật khẩu:</Text>
+        {/* Password */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Password:</Text>
           <TextInput
-            ref={passwordInputRef}
             style={styles.input}
-            placeholder="Nhập mật khẩu (ít nhất 6 ký tự)"
+            placeholder="Enter your password"
             placeholderTextColor="#999"
+            secureTextEntry
             value={password}
             onChangeText={setPassword}
-            secureTextEntry
-            textContentType="newPassword" // Helps password managers suggest strong passwords
-            returnKeyType="next"
-            onSubmitEditing={() => confirmPasswordInputRef.current?.focus()}
-            blurOnSubmit={false}
           />
+        </View>
 
-          {/* Confirm Password Input */}
-          <Text style={styles.label}>Xác nhận Mật khẩu:</Text>
+        {/* Confirm Password */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Confirm Password:</Text>
           <TextInput
-            ref={confirmPasswordInputRef}
             style={styles.input}
-            placeholder="Nhập lại mật khẩu của bạn" // Improved placeholder
+            placeholder="Re-enter your password"
             placeholderTextColor="#999"
+            secureTextEntry
             value={confirmPassword}
             onChangeText={setConfirmPassword}
-            secureTextEntry
-            textContentType="newPassword"
-            returnKeyType="done" // Last input field
-            onSubmitEditing={handleSignup} // Trigger signup on "Done"
           />
-
-          {/* Sign Up Button */}
-          <TouchableOpacity
-            style={styles.signUpButton} // Renamed style for clarity
-            onPress={handleSignup}
-            activeOpacity={0.8}
-            disabled={isLoading} // Disable button while loading
-          >
-            {isLoading ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Text style={styles.signUpText}>ĐĂNG KÝ</Text>
-            )}
-          </TouchableOpacity>
-
-            {/* Link to Login */}
-             <View style={styles.loginContainer}>
-                <Text style={styles.loginText}>Đã có tài khoản? </Text>
-                <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                <Text style={styles.loginLink}>Đăng nhập</Text>
-                </TouchableOpacity>
-            </View>
         </View>
-      </ScrollView>
-      <StatusBar barStyle={Platform.OS === 'ios' ? 'dark-content' : 'default'} />
+
+        {/* Nút SIGN IN (thực ra là đăng ký) */}
+        <TouchableOpacity 
+          style={[styles.signInButton, loading && { opacity: 0.7 }]}
+          onPress={handleSignUp}
+          disabled={loading}
+        >
+          <Text style={styles.signInText}>{loading ? 'Please wait...' : 'SIGN IN'}</Text>
+        </TouchableOpacity>
+      </View>
     </KeyboardAvoidingView>
   );
 }
 
-// Updated Styles
+// ===================== Styles =====================
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-  },
-  scrollContainer: {
-    flexGrow: 1,
+    backgroundColor: '#fff', 
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 30,
-    paddingVertical: 20,
+    paddingHorizontal: 20,
   },
   backButton: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 60 : 40,
+    top: 40,
     left: 20,
-    zIndex: 1,
   },
   backText: {
-    fontSize: 28,
-    color: '#333',
+    fontSize: 24,
+    color: '#000',
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 30, // Adjusted margin
-    color: '#333',
-  },
-  formContainer: {
+  registerBox: {
     width: '100%',
+    maxWidth: 350,
+    backgroundColor: '#f4f4f4',
+    borderRadius: 10,
+    padding: 20,
     alignItems: 'center',
   },
+  registerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#000',
+  },
+  inputContainer: {
+    width: '100%',
+    marginBottom: 10,
+  },
   label: {
-    fontSize: 16,
-    marginBottom: 8,
-    color: '#555',
-    alignSelf: 'flex-start',
-    marginLeft: 10,
+    color: '#444',
+    fontSize: 14,
+    marginBottom: 5,
+    marginLeft: 5,
   },
   input: {
     width: '100%',
-    height: 50,
-    borderWidth: 1,
-    borderColor: '#ccc',
+    height: 45,
+    backgroundColor: '#fff',
     borderRadius: 25,
-    paddingHorizontal: 20,
-    marginBottom: 15, // Consistent margin
-    fontSize: 16,
-    backgroundColor: '#f9f9f9',
-    color: '#333',
+    paddingHorizontal: 15,
+    color: '#000',
+    borderWidth: 1,
+    borderColor: '#ddd',
   },
-  signUpButton: { // Renamed style
-    width: '100%',
-    height: 50,
+  signInButton: {
     backgroundColor: '#000',
     borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 20, // Added margin top
-    marginBottom: 20, // Added margin bottom
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-  },
-  signUpText: { // Renamed style
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-    textTransform: 'uppercase',
-  },
-  loginContainer: { // Styles for login link
-    flexDirection: 'row',
-    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 40,
     alignItems: 'center',
     marginTop: 15,
+    width: '60%',
   },
-  loginText: {
-    color: '#666',
-    fontSize: 14,
-  },
-  loginLink: {
-    color: '#007AFF',
-    fontWeight: 'bold',
-    fontSize: 14,
-    marginLeft: 5,
+  signInText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

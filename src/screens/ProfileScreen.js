@@ -1,81 +1,232 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons'; // Hoặc import từ react-native-vector-icons/Ionicons
 
-const ProfileScreen = () => {
+export default function ProfileScreen() {
+  // Thay thế đường dẫn avatar người dùng thật vào đây
+  const userAvatar =
+    'https://via.placeholder.com/150x150.png?text=Avatar';
+
   return (
-    <View style={styles.screen}>
-      <Text style={styles.header}>Profile</Text>
-      <View style={styles.profileHeader}>
-        <Text style={styles.avatar}>👤</Text>
-        <Text style={styles.name}>Hường</Text>
-        <Text style={styles.email}>huong@email.com</Text>
+    <ScrollView style={styles.container}>
+      {/* Phần trên: Thông tin người dùng */}
+      <View style={styles.header}>
+        {/* Icon cài đặt ở góc phải (nếu muốn) */}
+        <TouchableOpacity style={styles.settingsIcon} onPress={() => alert('Đi đến trang cài đặt')}>
+          <Ionicons name="settings-sharp" size={24} color="#000" />
+        </TouchableOpacity>
+
+        {/* Avatar người dùng */}
+        <View style={styles.avatarContainer}>
+          <Image source={{ uri: userAvatar }} style={styles.avatar} />
+        </View>
+
+        {/* Tên và @handle */}
+        <Text style={styles.userName}>Thanh Nhật</Text>
+        <Text style={styles.userHandle}>@ThanhNhat41 · Đã tham gia tháng Chín 2023</Text>
+
+        {/* Thông tin thống kê cơ bản (Khoa học, Đang theo dõi, Người theo dõi) */}
+        <View style={styles.userStatsContainer}>
+          {/* <View style={styles.statItem}>
+            <Text style={styles.statTitle}>Khoa học</Text>
+            <Text style={styles.statValue}>0</Text>
+          </View> */}
+          <View style={styles.statItem}>
+            <Text style={styles.statTitle}>Đang theo dõi</Text>
+            <Text style={styles.statValue}>0</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={styles.statTitle}>Người theo dõi</Text>
+            <Text style={styles.statValue}>0</Text>
+          </View>
+        </View>
+
+        {/* Nút thêm bạn bè */}
+        <TouchableOpacity style={styles.addFriendButton} onPress={() => alert('Thêm bạn bè')}>
+          <Text style={styles.addFriendText}>+ THÊM BẠN BÈ</Text>
+        </TouchableOpacity>
       </View>
 
-      <View style={styles.profileSection}>
-        <Text style={styles.sectionHeader}>Details</Text>
-        <Text style={styles.profileItem}>🎯 Goal: Build Muscle</Text>
-        <Text style={styles.profileItem}>⚖️ Weight: 70.5 kg</Text>
-        <Text style={styles.profileItem}>📏 Height: 175 cm</Text>
+      {/* Phần nội dung: Tổng quan */}
+      <View style={styles.overviewContainer}>
+        <Text style={styles.sectionTitle}>Tổng quan</Text>
+
+        <View style={styles.overviewStatsWrapper}>
+          {/* Mỗi khối thống kê */}
+          <View style={styles.overviewItem}>
+            <Text style={styles.overviewValue}>0</Text>
+            <Text style={styles.overviewLabel}>Ngày streak</Text>
+          </View>
+
+          <View style={styles.overviewItem}>
+            <Text style={styles.overviewValue}>1393</Text>
+            <Text style={styles.overviewLabel}>Tổng KN</Text>
+          </View>
+
+          <View style={styles.overviewItem}>
+            <Text style={styles.overviewValue}>407</Text>
+            <Text style={styles.overviewLabel}>Từ vựng đã học</Text>
+          </View>
+
+          <View style={styles.overviewItem}>
+            <Text style={styles.overviewValue}>669</Text>
+            <Text style={styles.overviewLabel}>Đây là gì?</Text>
+            {/* Đặt label phù hợp cho số liệu 669 (ví dụ: 'Điểm' / 'Bài tập đã hoàn thành', tuỳ ý) */}
+          </View>
+        </View>
       </View>
 
-      <TouchableOpacity style={styles.logoutButton}>
-        <Text style={styles.logoutText}>🚪 Logout</Text>
-      </TouchableOpacity>
-    </View>
+      {/* Phần huy hiệu: Thử thách tháng */}
+      {/* <View style={styles.badgeContainer}>
+        <Text style={styles.badgeTitle}>Bài viết của tôi</Text>
+        <TouchableOpacity onPress={() => alert('Xem tất cả huy hiệu')}>
+          <Text style={styles.viewAll}>XEM TẤT CẢ</Text>
+        </TouchableOpacity>
+      </View> */}
+
+      {/* Nếu có danh sách huy hiệu hoặc phần tiếp theo, hiển thị ở đây */}
+      {/* <View> 
+        ...
+      </View> */}
+    </ScrollView>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  screen: {
+  container: {
     flex: 1,
-    backgroundColor: '#212529',
-    padding: 20,
+    backgroundColor: '#fff',
   },
+  /** Header trên cùng **/
   header: {
-    fontSize: 30,
-    color: '#f8f9fa',
-    marginBottom: 20,
-  },
-  profileHeader: {
+    backgroundColor: '#f2f2f2', // Màu nền nhạt, tuỳ chỉnh
     alignItems: 'center',
-    marginBottom: 30,
+    paddingBottom: 20,
+    paddingTop: 50,
+    position: 'relative',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+  },
+  settingsIcon: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+  },
+  avatarContainer: {
+    marginBottom: 12,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: '#fff',
   },
   avatar: {
-    fontSize: 50,
-    color: '#f8f9fa',
+    width: '100%',
+    height: '100%',
   },
-  name: {
-    fontSize: 22,
-    color: '#f8f9fa',
-    marginVertical: 10,
-  },
-  email: {
-    fontSize: 16,
-    color: '#adb5bd',
-  },
-  profileSection: {
-    marginBottom: 30,
-  },
-  sectionHeader: {
+  userName: {
     fontSize: 20,
-    color: '#f8f9fa',
-    marginBottom: 10,
+    fontWeight: 'bold',
+    color: '#333',
   },
-  profileItem: {
-    fontSize: 16,
-    color: '#adb5bd',
-    marginBottom: 10,
+  userHandle: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 4,
+    marginBottom: 16,
   },
-  logoutButton: {
-    backgroundColor: '#dc3545',
-    padding: 15,
-    borderRadius: 25,
+  userStatsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    width: '100%',
+    marginBottom: 12,
+  },
+  statItem: {
     alignItems: 'center',
   },
-  logoutText: {
-    color: '#fff',
+  statTitle: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
+  },
+  statValue: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  addFriendButton: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    elevation: 2, // Hiệu ứng đổ bóng nhẹ trên Android
+  },
+  addFriendText: {
+    color: '#007bff',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+
+  /** Phần Tổng quan **/
+  overviewContainer: {
+    marginTop: 20,
+    paddingHorizontal: 16,
+  },
+  sectionTitle: {
     fontSize: 18,
+    fontWeight: '700',
+    color: '#333',
+    marginBottom: 12,
+  },
+  overviewStatsWrapper: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  overviewItem: {
+    width: '48%',
+    backgroundColor: '#fafafa',
+    borderRadius: 10,
+    padding: 16,
+    marginBottom: 10,
+    alignItems: 'center',
+  },
+  overviewValue: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#ff9f43', // Màu nổi bật tuỳ chọn
+    marginBottom: 6,
+  },
+  overviewLabel: {
+    fontSize: 14,
+    color: '#333',
+  },
+
+  /** Phần Huy hiệu **/
+  badgeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    marginTop: 20,
+    marginBottom: 10,
+  },
+  badgeTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#333',
+  },
+  viewAll: {
+    fontSize: 14,
+    color: '#007bff',
+    fontWeight: '600',
   },
 });
-
-export default ProfileScreen;

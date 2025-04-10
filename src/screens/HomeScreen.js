@@ -7,10 +7,12 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
+import Header from '../components/Head'; 
 
 export default function HomeScreen() {
   return (
     <View style={styles.container}>
+      <Header />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/* Calendar Card */}
         <View style={styles.card}>
@@ -55,54 +57,32 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Calories Card */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Today's Calories</Text>
-          <View style={styles.calorieRow}>
-            <Text style={styles.currentCal}>350 Kcal</Text>
-            <Text style={styles.goalText}>/ 500 Kcal Goal</Text>
-          </View>
-          <View style={styles.progressBar}>
-            <View style={[styles.progressValue, { width: '70%' }]} />
-          </View>
-        </View>
-
         {/* Exercise Section */}
         <View style={styles.exerciseContainer}>
           <Text style={styles.exerciseTitle}>Exercise</Text>
-          <View style={styles.exerciseRow}>
-            <TouchableOpacity
-              style={[styles.exerciseBox, { backgroundColor: '#FF8C00' }]}
-            >
+          <View style={styles.exerciseColumn}>
+            <TouchableOpacity style={styles.exerciseBox}>
               <Text style={styles.exerciseIcon}>💪</Text>
               <View style={styles.catInfo}>
                 <Text style={styles.catTitle}>Chest</Text>
               </View>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[styles.exerciseBox, { backgroundColor: '#0056B3' }]}
-            >
+            <TouchableOpacity style={styles.exerciseBox}>
               <Text style={styles.exerciseIcon}>🏋️</Text>
               <View style={styles.catInfo}>
                 <Text style={styles.catTitle}>Shoulder</Text>
               </View>
             </TouchableOpacity>
-          </View>
 
-          <View style={styles.exerciseRow}>
-            <TouchableOpacity
-              style={[styles.exerciseBox, { backgroundColor: '#5A6268' }]}
-            >
+            <TouchableOpacity style={styles.exerciseBox}>
               <Text style={styles.exerciseIcon}>🤸</Text>
               <View style={styles.catInfo}>
                 <Text style={styles.catTitle}>Abs</Text>
               </View>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[styles.exerciseBox, { backgroundColor: '#1E7E34' }]}
-            >
+            <TouchableOpacity style={styles.exerciseBox}>
               <Text style={styles.exerciseIcon}>🦵</Text>
               <View style={styles.catInfo}>
                 <Text style={styles.catTitle}>Legs</Text>
@@ -126,22 +106,21 @@ const styles = StyleSheet.create({
   },
   // ===== CARD STYLES =====
   card: {
-    backgroundColor: '#fff', // card nền trắng
+    backgroundColor: '#fff',
     borderRadius: 10,
     padding: 15,
     marginBottom: 15,
     borderWidth: 1,
     borderColor: '#ddd',
-    // Shadow (cho iOS)
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 3,
-    elevation: 1, // cho Android
+    elevation: 1,
   },
   cardTitle: {
     fontSize: 18,
-    color: '#333', // text tối cho card
+    color: '#333',
     fontWeight: '600',
     marginBottom: 12,
   },
@@ -180,33 +159,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#555',
   },
-  // ===== CALORIES SECTION =====
-  calorieRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    marginBottom: 8,
-  },
-  currentCal: {
-    fontSize: 18,
-    color: '#FF5722', // cam đậm
-    fontWeight: 'bold',
-    marginRight: 5,
-  },
-  goalText: {
-    fontSize: 14,
-    color: '#777',
-  },
-  progressBar: {
-    height: 8,
-    backgroundColor: '#ddd',
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
-  progressValue: {
-    height: 8,
-    backgroundColor: '#FF5722',
-    borderRadius: 4,
-  },
   // ===== EXERCISE SECTION =====
   exerciseContainer: {
     marginBottom: 15,
@@ -217,18 +169,16 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 10,
   },
-  exerciseRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 10,
+  exerciseColumn: {
+    flexDirection: 'column',
   },
   exerciseBox: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#BDBDBD', // all boxes gray
     borderRadius: 10,
     padding: 15,
-    flex: 1,
-    marginRight: 10,
+    marginBottom: 10,
   },
   exerciseIcon: {
     fontSize: 24,

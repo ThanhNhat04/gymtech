@@ -1,6 +1,7 @@
 import React from 'react';
 import { Text, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 // Import các màn hình từ thư mục screens
 import HomeScreen from '../screens/HomeScreen';
@@ -13,13 +14,12 @@ import ProfileScreen from '../screens/ProfileScreen';
 
 const Tab = createBottomTabNavigator();
 
-export default function BottomTabNavigator() {
+export default function MainTabNavigator() {
   return (
-
     <Tab.Navigator
       initialRouteName="Home"
       screenOptions={{
-        tabBarStyle: { backgroundColor: '#212529', paddingBottom: 10 },
+        tabBarStyle: { backgroundColor: '#212529', paddingBottom: 10, height: 65},
         tabBarLabelStyle: { color: '#f8f9fa', fontSize: 12 },
         headerShown: false,
       }}
@@ -29,7 +29,7 @@ export default function BottomTabNavigator() {
         component={HomeScreen}
         options={{
           tabBarLabel: 'Home',
-          tabBarIcon: () => <Text style={styles.icon}>🏠</Text>,
+          tabBarIcon: () => <MaterialCommunityIcons name="home" size={26} color="#f8f9fa" />
         }}
       />
       <Tab.Screen
@@ -37,7 +37,7 @@ export default function BottomTabNavigator() {
         component={LibraryScreen}
         options={{
           tabBarLabel: 'Exercises',
-          tabBarIcon: () => <Text style={styles.icon}>🏋️</Text>,
+          tabBarIcon: () => <MaterialCommunityIcons name="library" size={26} color="#f8f9fa" />
         }}
       />
       <Tab.Screen
@@ -45,10 +45,10 @@ export default function BottomTabNavigator() {
         component={CommunityScreen}
         options={{
           tabBarLabel: 'Community',
-          tabBarIcon: () => <Text style={styles.icon}>👥</Text>,
+          tabBarIcon: () => <MaterialCommunityIcons name="account-group" size={26} color="#f8f9fa" />,
         }}
       />
-      <Tab.Screen
+      {/* <Tab.Screen
         name="Progress"
         component={ProgressScreen}
         options={{
@@ -71,13 +71,13 @@ export default function BottomTabNavigator() {
           tabBarLabel: 'Profile',
           tabBarIcon: () => <Text style={styles.icon}>👤</Text>,
         }}
-      />
+      /> */}
     </Tab.Navigator>
   );
 }
 
 const styles = StyleSheet.create({
   icon: {
-    fontSize: 24,
+    fontSize: 22,
   },
 });

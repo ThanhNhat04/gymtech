@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'; // <--- Import useRef
+import React, { useState, useContext } from 'react';
 import {
   View,
   Text,
@@ -8,226 +8,207 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
-  StatusBar
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { AuthContext } from '../../context/AuthContext';
 
-export default function Login() {
+export default function LoginScreen() {
   const navigation = useNavigation();
+  const { login } = useContext(AuthContext); // Lấy hàm login từ AuthContext
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const passwordInputRef = useRef(null); // <--- Initialize ref
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    // Trim inputs for validation
-    const trimmedEmail = email.trim();
-    const trimmedPassword = password.trim();
-
-    if (!trimmedEmail || !trimmedPassword) {
-      Alert.alert('Error', 'Please enter both email and password.');
+  const handleSignIn = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please enter both email and password');
       return;
     }
-
-    // For demo purposes, using hardcoded credentials
-    const validEmail = 'test@gmail.com';
-    const validPassword = '123456';
-
-    // Compare trimmed and potentially case-insensitive email
-    if (trimmedEmail.toLowerCase() === validEmail && trimmedPassword === validPassword) {
-      console.log('Login successful!');
-      // --- CẬP NHẬT QUAN TRỌNG Ở ĐÂY ---
-      // Reset the navigation stack to HomeScreen, removing Login from history
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'HomeScreen' }], // Set HomeScreen as the only screen in the stack
+    setLoading(true);
+    try {
+      const response = await fetch('https://gym.s4h.edu.vn/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email.trim(),
+          password: password.trim(),
+        }),
       });
-      // ---------------------------------
-    } else {
-      Alert.alert('Error', 'Invalid email or password.');
+      const data = await response.json();
+      if (response.ok) {
+        console.log('Login success:', data);
+        // Giả sử backend trả về token trong data.token
+        await login(data.token);
+        // Reset Navigator để chuyển sang giao diện chính
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'MainTabs' }],
+        });
+      } else {
+        Alert.alert('Login failed', data?.message || 'Unknown error');
+      }
+    } catch (error) {
+      console.error('Error login:', error);
+      Alert.alert('Error', 'Something went wrong');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const navigateToSignup = () => {
-    // Ensure 'Signup' is defined in your navigator
-    navigation.navigate('Signup');
+  const handleGoBack = () => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    } else {
+      navigation.navigate('Splash');
+    }
   };
 
-  const handleForgotPassword = () => {
-    Alert.alert('Notice', 'Forgot password feature is under development.');
+  const handleSignUpLink = () => {
+    navigation.navigate('Register');
   };
 
-  // --- JSX Phần còn lại giữ nguyên ---
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
-      enabled
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView
-        contentContainerStyle={styles.scrollContainer}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()} // Nút này vẫn hữu ích nếu người dùng từ Signup quay lại Login
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        >
+      {navigation.canGoBack() && (
+        <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
           <Text style={styles.backText}>←</Text>
         </TouchableOpacity>
-
-        <Text style={styles.title}>LOGIN</Text>
-
-        <View style={styles.formContainer}>
+      )}
+      <View style={styles.loginBox}>
+        <Text style={styles.loginTitle}>LOGIN</Text>
+        <View style={styles.inputContainer}>
           <Text style={styles.label}>Email:</Text>
           <TextInput
             style={styles.input}
             placeholder="Enter your email"
             placeholderTextColor="#999"
-            value={email}
-            onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
-            autoCorrect={false}
-            textContentType="emailAddress"
-            returnKeyType="next"
-            onSubmitEditing={() => passwordInputRef.current?.focus()}
-            blurOnSubmit={false}
+            value={email}
+            onChangeText={setEmail}
           />
-
+        </View>
+        <View style={styles.inputContainer}>
           <Text style={styles.label}>Password:</Text>
           <TextInput
-            ref={passwordInputRef}
             style={styles.input}
             placeholder="Enter your password"
             placeholderTextColor="#999"
+            secureTextEntry
             value={password}
             onChangeText={setPassword}
-            secureTextEntry
-            textContentType="password"
-            returnKeyType="done"
-            onSubmitEditing={handleLogin} // Trigger login on "Done"
           />
-
-          <TouchableOpacity onPress={handleForgotPassword}>
-            <Text style={styles.forgotPassword}>Forgot password?</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.signInButton}
-            onPress={handleLogin}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.signInText}>SIGN IN</Text>
-          </TouchableOpacity>
-
-          <View style={styles.signupContainer}>
-            <Text style={styles.signupText}>Don't have an account? </Text>
-            <TouchableOpacity onPress={navigateToSignup}>
-              <Text style={styles.signupLink}>Sign up</Text>
-            </TouchableOpacity>
-          </View>
         </View>
-      </ScrollView>
-      <StatusBar barStyle={Platform.OS === 'ios' ? 'dark-content' : 'default'} />
+        <TouchableOpacity style={styles.forgotButton} onPress={() => Alert.alert('Forgot Password', 'Not implemented.')}>
+          <Text style={styles.forgotText}>Forgot password?</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.signInButton, loading && { opacity: 0.7 }]}
+          onPress={handleSignIn}
+          disabled={loading}
+        >
+          <Text style={styles.signInText}>{loading ? 'Please wait...' : 'SIGN IN'}</Text>
+        </TouchableOpacity>
+        <View style={styles.signUpRow}>
+          <Text style={styles.signUpQuestion}>Don't have an account?</Text>
+          <TouchableOpacity onPress={handleSignUpLink}>
+            <Text style={styles.signUpLink}>Sign up</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </KeyboardAvoidingView>
   );
 }
 
-// --- Stylesheet giữ nguyên ---
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-  },
-  scrollContainer: {
-    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 30,
-    paddingVertical: 20,
+    paddingHorizontal: 20,
   },
   backButton: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 60 : 40,
+    top: Platform.OS === 'ios' ? 50 : 30,
     left: 20,
-    zIndex: 1,
   },
   backText: {
-    fontSize: 28,
-    color: '#333',
+    fontSize: 24,
+    color: '#000',
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 40,
-    color: '#333',
-  },
-  formContainer: {
+  loginBox: {
     width: '100%',
+    maxWidth: 350,
+    backgroundColor: '#f4f4f4',
+    borderRadius: 10,
+    padding: 20,
     alignItems: 'center',
   },
+  loginTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#000',
+  },
+  inputContainer: {
+    width: '100%',
+    marginBottom: 10,
+  },
   label: {
-    fontSize: 16,
-    marginBottom: 8,
-    color: '#555',
-    alignSelf: 'flex-start',
-    marginLeft: 10,
+    color: '#444',
+    fontSize: 14,
+    marginBottom: 5,
+    marginLeft: 5,
   },
   input: {
     width: '100%',
-    height: 50,
-    borderWidth: 1,
-    borderColor: '#ccc',
+    height: 45,
+    backgroundColor: '#fff',
     borderRadius: 25,
-    paddingHorizontal: 20,
-    marginBottom: 15,
-    fontSize: 16,
-    backgroundColor: '#f9f9f9',
-    color: '#333',
+    paddingHorizontal: 15,
+    color: '#000',
+    borderWidth: 1,
+    borderColor: '#ddd',
   },
-  forgotPassword: {
+  forgotButton: {
     alignSelf: 'flex-end',
-    color: '#007AFF',
-    marginBottom: 25,
+    marginRight: 10,
+    marginBottom: 15,
+  },
+  forgotText: {
     fontSize: 14,
+    color: '#007AFF',
   },
   signInButton: {
-    width: '100%',
-    height: 50,
     backgroundColor: '#000',
     borderRadius: 25,
-    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 40,
     alignItems: 'center',
-    marginBottom: 30,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
+    marginBottom: 15,
+    width: '60%',
   },
   signInText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: 'bold',
-    textTransform: 'uppercase',
+    fontWeight: '600',
   },
-  signupContainer: {
+  signUpRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 20,
   },
-  signupText: {
-    color: '#666',
+  signUpQuestion: {
     fontSize: 14,
+    color: '#333',
+    marginRight: 5,
   },
-  signupLink: {
+  signUpLink: {
+    fontSize: 14,
     color: '#007AFF',
-    fontWeight: 'bold',
-    fontSize: 14,
-    marginLeft: 5,
+    fontWeight: '600',
   },
 });
